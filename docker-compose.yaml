@@ -1,0 +1,39 @@
+version: "3.8"
+services:
+    server:
+        build:
+            context: ./
+            dockerfile: ./server.Dockerfile
+        image: file-transfer-server-app
+        container_name: file-transfer-server
+        environment:
+            SERVER_PORT: 1111 #${SERVER_PORT}
+        volumes:
+            -   "./uploads:/uploads"
+        networks:
+            test-network:
+                ipv4_address: 172.21.0.2
+    client:
+        build:
+            context: ./
+            dockerfile: ./client.Dockerfile
+        image: file-transfer-client-app
+        container_name: file-transfer-client
+        depends_on:
+            -   server
+        environment:
+            SERVER_ADDRESS: 172.21.0.2
+            SERVER_PORT: 1111 #${SERVER_PORT}
+            FILE_NAME: hello.txt #${FILE_NAME}
+        volumes:
+            - "./transfer-files:/transfer-files"
+        networks:
+            test-network:
+                ipv4_address: 172.21.0.3
+networks:
+    test-network:
+        ipam:
+            driver: default
+            config:
+                - subnet: 172.21.0.0/16
+                  gateway: 172.21.0.1
