@@ -7,7 +7,7 @@ services:
         image: file-transfer-server-app
         container_name: file-transfer-server
         environment:
-            SERVER_PORT: 1111 #${SERVER_PORT}
+            SERVER_PORT: ${SERVER_PORT}
         volumes:
             -   "./uploads:/uploads"
         networks:
@@ -23,8 +23,8 @@ services:
             -   server
         environment:
             SERVER_ADDRESS: 172.21.0.2
-            SERVER_PORT: 1111 #${SERVER_PORT}
-            FILE_NAME: hello.txt #${FILE_NAME}
+            SERVER_PORT: ${SERVER_PORT}
+            FILE_NAME: ${FILE_NAME}
         volumes:
             - "./transfer-files:/transfer-files"
         networks:
