@@ -20,13 +20,13 @@ func transferFile(transferAddr *net.TCPAddr, session *session) {
 		sendResponse("error", "Failed to create transfer connection", session.encoder)
 		return
 	}
-	core.Log.Infof("Created transfer connection to %v", transferAddr)
+	core.Log.Debugf("Created transfer connection to %v", transferAddr)
 	defer func() {
 		if err := transferConn.Close(); err != nil {
 			core.Log.Errorf("Transfer connection closing error: %v", err)
 			return
 		}
-		core.Log.Infof("Closed transfer connection to %v", transferAddr)
+		core.Log.Debugf("Closed transfer connection to %v", transferAddr)
 	}()
 
 	// Open file
@@ -36,13 +36,13 @@ func transferFile(transferAddr *net.TCPAddr, session *session) {
 		sendResponse("error", "Internal server error", session.encoder)
 		return
 	}
-	core.Log.Infof("Opened file %s", session.filePath)
+	core.Log.Debugf("Opened file %s", session.filePath)
 	defer func() {
 		if err := file.Close(); err != nil {
 			core.Log.Errorf("File closing error: %v", err)
 			return
 		}
-		core.Log.Infof("Closed file %s", session.filePath)
+		core.Log.Debugf("Closed file %s", session.filePath)
 	}()
 
 	// Start speed counter
@@ -58,7 +58,7 @@ func transferFile(transferAddr *net.TCPAddr, session *session) {
 	fileHashSum := sha256.New()
 	multiWriter := io.MultiWriter(file, fileHashSum)
 
-	core.Log.Infof("Start file transfer")
+	core.Log.Debugf("Start file transfer")
 	for session.actualFileSize < session.expectedFileSize {
 		received, err := transferConn.Read(buffer)
 		if err != nil {
@@ -84,7 +84,7 @@ func transferFile(transferAddr *net.TCPAddr, session *session) {
 	scheduler.Stop()
 	speedCounter.calcSpeed(session)
 
-	core.Log.Infof("Finish file transfer")
+	core.Log.Debugf("Finish file transfer")
 
 	// Update session
 	session.fileHashSum = hex.EncodeToString(fileHashSum.Sum(nil))

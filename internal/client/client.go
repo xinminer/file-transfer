@@ -20,7 +20,7 @@ func Start(serverAddr *net.TCPAddr, filePath string) {
 		core.Log.Errorf("File search error: %v", err)
 		return
 	}
-	core.Log.Infof("Found file %s", filePath)
+	core.Log.Debugf("Found file %s", filePath)
 
 	// Create control connection
 	controlConn, err := net.DialTCP("tcp", nil, serverAddr)
@@ -28,13 +28,13 @@ func Start(serverAddr *net.TCPAddr, filePath string) {
 		core.Log.Errorf("Control connection creation error: %v", err)
 		return
 	}
-	core.Log.Infof("Created control connection to %v", controlConn.RemoteAddr())
+	core.Log.Debugf("Created control connection to %v", controlConn.RemoteAddr())
 	defer func() {
 		if err := controlConn.Close(); err != nil {
 			core.Log.Errorf("Control connection closing error: %v", err)
 			return
 		}
-		core.Log.Infof("Closed control connection to %v", controlConn.RemoteAddr())
+		core.Log.Debugf("Closed control connection to %v", controlConn.RemoteAddr())
 	}()
 
 	encoder := json.NewEncoder(controlConn)
@@ -74,7 +74,7 @@ func Start(serverAddr *net.TCPAddr, filePath string) {
 	if err := transferConnListener.Close(); err != nil {
 		core.Log.Errorf("Transfer connection listener closing error: %v", err)
 	} else {
-		core.Log.Infof("Closed transfer connection listener to %v", transferConnListener.Addr())
+		core.Log.Debugf("Closed transfer connection listener to %v", transferConnListener.Addr())
 	}
 
 	// Send file data
@@ -85,7 +85,7 @@ func Start(serverAddr *net.TCPAddr, filePath string) {
 	if err := transferConn.Close(); err != nil {
 		core.Log.Errorf("Transfer connection closing error: %v", err)
 	} else {
-		core.Log.Infof("Closed transfer connection to %v", transferConn.RemoteAddr())
+		core.Log.Debugf("Closed transfer connection to %v", transferConn.RemoteAddr())
 	}
 
 	// Send end_transfer

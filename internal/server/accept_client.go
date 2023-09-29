@@ -28,7 +28,7 @@ func Start(serverAddr *net.TCPAddr) {
 			core.Log.Errorf("Control connection listener closing error: %v", err)
 			return
 		}
-		core.Log.Infof("Closed control connection listener")
+		core.Log.Debugf("Closed control connection listener")
 	}()
 
 	// Accepting control connection
@@ -37,7 +37,7 @@ func Start(serverAddr *net.TCPAddr) {
 		if err != nil {
 			core.Log.Errorf("Control connection accepting error: %v", err)
 		}
-		core.Log.Infof("Created control connection from %v", controlConn.RemoteAddr())
+		core.Log.Debugf("Created control connection from %v", controlConn.RemoteAddr())
 
 		go handleRequests(controlConn)
 	}

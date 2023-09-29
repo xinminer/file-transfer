@@ -20,7 +20,7 @@ func createTransferConnectionListener(listenIp net.IP) (*net.TCPListener, bool) 
 		core.Log.Errorf("Transfer connection listener error: %v", err)
 		return nil, false
 	}
-	core.Log.Infof("Listen to %v for transfer connection", listenAddr)
+	core.Log.Debugf("Listen to %v for transfer connection", listenAddr)
 	return listener, true
 }
 
@@ -38,7 +38,7 @@ func acceptTransferConnection(serverIp net.IP, listener *net.TCPListener) (net.C
 			break
 		}
 	}
-	core.Log.Infof("Created transfer connection from %v", transferConn.RemoteAddr())
+	core.Log.Debugf("Created transfer connection from %v", transferConn.RemoteAddr())
 	return transferConn, true
 }
 
@@ -49,10 +49,10 @@ func sendFileData(transferConn net.Conn, filePath string) (string, bool) {
 		core.Log.Errorf("File opening error: %v", err)
 		return "", false
 	}
-	core.Log.Infof("Open file %s", filePath)
+	core.Log.Debugf("Open file %s", filePath)
 	defer func() {
 		file.Close()
-		core.Log.Infof("Closed file %s", filePath)
+		core.Log.Debugf("Closed file %s", filePath)
 	}()
 
 	// Send file data and calculate file hash sum
@@ -60,7 +60,7 @@ func sendFileData(transferConn net.Conn, filePath string) (string, bool) {
 	fileHashSum := sha256.New()
 	multiWriter := io.MultiWriter(transferConn, fileHashSum)
 
-	core.Log.Infof("Start transfer file %s", file.Name())
+	core.Log.Debugf("Start transfer file %s", file.Name())
 	for {
 		read, err := file.Read(buffer)
 		if err != nil {
@@ -78,7 +78,7 @@ func sendFileData(transferConn net.Conn, filePath string) (string, bool) {
 		}
 	}
 
-	core.Log.Infof("Finish transfer file %s", file.Name())
+	core.Log.Debugf("Finish transfer file %s", file.Name())
 
 	return hex.EncodeToString(fileHashSum.Sum(nil)), true
 }

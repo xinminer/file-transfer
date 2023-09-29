@@ -22,7 +22,7 @@ func handleRequests(controlConn net.Conn) {
 			core.Log.Errorf("Control connection closing error: %v", err)
 			return
 		}
-		core.Log.Infof("Closed control connection from %v", controlConn.RemoteAddr())
+		core.Log.Debugf("Closed control connection from %v", controlConn.RemoteAddr())
 	}()
 
 	// Create session
@@ -108,7 +108,7 @@ func handleFileInfoRequest(data map[string]interface{}, session *session) bool {
 			fmt.Sprintf("Failed to create file %s", fileInfoRequest.FileName), session.encoder)
 		return false
 	}
-	core.Log.Infof("Created file %s/%s", uploadDir, fileInfoRequest.FileName)
+	core.Log.Debugf("Created file %s/%s", uploadDir, fileInfoRequest.FileName)
 	session.fileIsCreated = true
 
 	// Update session info
@@ -251,7 +251,7 @@ func removeUntransferredFile(session *session) {
 		if err := os.Remove(session.filePath); err != nil {
 			core.Log.Errorf("Untransferred file removing error: %v", err)
 		} else {
-			core.Log.Infof("File %s removed", session.filePath)
+			core.Log.Debugf("File %s removed", session.filePath)
 		}
 	}
 }
