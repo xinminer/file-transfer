@@ -10,7 +10,11 @@ import (
 	"file-transfer/internal/core"
 )
 
-func createTransferConnListener(listenAddr *net.TCPAddr) (*net.TCPListener, bool) {
+func createTransferConnectionListener(listenIp net.IP) (*net.TCPListener, bool) {
+	listenAddr := &net.TCPAddr{
+		IP:   listenIp,
+		Port: listenPort,
+	}
 	listener, err := net.ListenTCP("tcp", listenAddr)
 	if err != nil {
 		core.Log.Errorf("Transfer connection listener error: %v", err)
@@ -20,7 +24,7 @@ func createTransferConnListener(listenAddr *net.TCPAddr) (*net.TCPListener, bool
 	return listener, true
 }
 
-func acceptTransferConn(listener *net.TCPListener, remoteIp net.IP) (net.Conn, bool) {
+func acceptTransferConnection(serverIp net.IP, listener *net.TCPListener) (net.Conn, bool) {
 	var transferConn net.Conn
 	var err error
 	for {
@@ -30,7 +34,7 @@ func acceptTransferConn(listener *net.TCPListener, remoteIp net.IP) (net.Conn, b
 			return nil, false
 		}
 
-		if transferConn.RemoteAddr().(*net.TCPAddr).IP.String() == remoteIp.String() {
+		if transferConn.RemoteAddr().(*net.TCPAddr).IP.String() == serverIp.String() {
 			break
 		}
 	}
@@ -46,9 +50,12 @@ func sendFileData(transferConn net.Conn, filePath string) (string, bool) {
 		return "", false
 	}
 	core.Log.Infof("Open file %s", filePath)
-	defer file.Close()
+	defer func() {
+		file.Close()
+		core.Log.Infof("Closed file %s", filePath)
+	}()
 
-	// Send file data
+	// Send file data and calculate file hash sum
 	buffer := make([]byte, bufferSize)
 	fileHashSum := sha256.New()
 	multiWriter := io.MultiWriter(transferConn, fileHashSum)
