@@ -34,6 +34,7 @@ func handleRequests(controlConn net.Conn) {
 		if err := session.decoder.Decode(&data); err != nil {
 			core.Log.Errorf("Request receiving error: Expected message with JSON format: %v", err)
 			sendResponse("error", "Expected message with JSON format", session.encoder)
+			removeUntransferredFile(session)
 			return
 		}
 
@@ -41,6 +42,7 @@ func handleRequests(controlConn net.Conn) {
 		if _, ok := data["type"]; !ok {
 			core.Log.Errorf("Request conversion error: Field \"type\" is missing")
 			sendResponse("error", "Field \"type\" is missing", session.encoder)
+			removeUntransferredFile(session)
 			return
 		}
 
@@ -48,17 +50,22 @@ func handleRequests(controlConn net.Conn) {
 		switch data["type"].(string) {
 		case "file_info":
 			if !handleFileInfoRequest(data, session) {
+				removeUntransferredFile(session)
 				return
 			}
 		case "start_transfer":
 			if !handleStartTransferRequest(data, session) {
+				removeUntransferredFile(session)
 				return
 			}
 		case "end_transfer":
-			handleEndTransferRequest(data, session)
+			if !handleEndTransferRequest(data, session) {
+				removeUntransferredFile(session)
+			}
 			return
 		default:
 			handleUnsupportedRequest(data, session.encoder)
+			removeUntransferredFile(session)
 			return
 		}
 	}
@@ -101,10 +108,11 @@ func handleFileInfoRequest(data map[string]interface{}, session *session) bool {
 			fmt.Sprintf("Failed to create file %s", fileInfoRequest.FileName), session.encoder)
 		return false
 	}
-	core.Log.Infof("Created file %s", fileInfoRequest.FileName)
+	core.Log.Infof("Created file %s/%s", uploadDir, fileInfoRequest.FileName)
+	session.fileIsCreated = true
 
 	// Update session info
-	session.fileName = fileInfoRequest.FileName
+	session.filePath = uploadDir + "/" + fileInfoRequest.FileName
 	session.expectedFileSize = fileInfoRequest.FileSize
 	session.stage = "start_transfer"
 
@@ -190,7 +198,7 @@ func handleEndTransferRequest(data map[string]interface{}, session *session) boo
 
 	// Send success response
 	sendResponse("success", "", session.encoder)
-	core.Log.Infof("File %s transferred successfully", session.fileName)
+	core.Log.Infof("File %s transferred successfully", session.filePath)
 
 	// Update session
 	session.stage = ""
@@ -236,4 +244,14 @@ func validateFileInfo(fileInfo core.FileInfoRequest) error {
 	}
 
 	return nil
+}
+
+func removeUntransferredFile(session *session) {
+	if session.fileIsCreated {
+		if err := os.Remove(session.filePath); err != nil {
+			core.Log.Errorf("Untransferred file removing error: %v", err)
+		} else {
+			core.Log.Infof("File %s removed", session.filePath)
+		}
+	}
 }

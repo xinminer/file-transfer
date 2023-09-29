@@ -3,7 +3,6 @@ package server
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
 	"io"
 	"net"
 	"os"
@@ -31,19 +30,19 @@ func transferFile(transferAddr *net.TCPAddr, session *session) {
 	}()
 
 	// Open file
-	file, err := os.OpenFile(fmt.Sprintf("%s/%s", uploadDir, session.fileName), os.O_RDWR, 0)
+	file, err := os.OpenFile(session.filePath, os.O_RDWR, 0)
 	if err != nil {
 		core.Log.Errorf("File opening error: %v", err)
 		sendResponse("error", "Internal server error", session.encoder)
 		return
 	}
-	core.Log.Infof("Opened file %s/%s", uploadDir, session.fileName)
+	core.Log.Infof("Opened file %s", session.filePath)
 	defer func() {
 		if err := file.Close(); err != nil {
 			core.Log.Errorf("File closing error: %v", err)
 			return
 		}
-		core.Log.Infof("Closed file %s/%s", uploadDir, session.fileName)
+		core.Log.Infof("Closed file %s", session.filePath)
 	}()
 
 	// Start speed counter

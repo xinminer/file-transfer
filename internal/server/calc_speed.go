@@ -30,6 +30,6 @@ func (speedCounter *speedComputer) calcSpeed(sessionInfo *session) {
 	speedCounter.previousTime = time.Now()
 	speedCounter.previousActualFileSize = sessionInfo.actualFileSize
 
-	core.Log.Infof("Transfer %s: %s, %s", sessionInfo.fileName, speedToString(instantSpeed),
+	core.Log.Infof("Transfer %s: %s, %s", sessionInfo.filePath, speedToString(instantSpeed),
 		speedToString(averageSpeed))
 }
