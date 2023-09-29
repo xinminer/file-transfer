@@ -9,7 +9,8 @@ type session struct {
 	encoder          *json.Encoder
 	decoder          *json.Decoder
 	controlAddr      *net.TCPAddr
-	fileName         string
+	fileIsCreated    bool
+	filePath         string
 	expectedFileSize int64
 	actualFileSize   int64
 	fileHashSum      string
@@ -21,7 +22,8 @@ func newSession(conn net.Conn) *session {
 		encoder:          json.NewEncoder(conn),
 		decoder:          json.NewDecoder(conn),
 		controlAddr:      conn.RemoteAddr().(*net.TCPAddr),
-		fileName:         "",
+		fileIsCreated:    false,
+		filePath:         "",
 		expectedFileSize: 0,
 		actualFileSize:   0,
 		fileHashSum:      "",
