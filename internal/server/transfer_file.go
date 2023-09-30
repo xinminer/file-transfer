@@ -61,20 +61,21 @@ func transferFile(transferAddr *net.TCPAddr, session *session) {
 
 	core.Log.Debugf("Start file transfer")
 	for session.actualFileSize < session.expectedFileSize {
+		transferConn.SetReadDeadline(time.Now().Add(clientTimeout))
 		received, err := transferConn.Read(buffer)
 		if err != nil {
 			if err == io.EOF {
 				break
 			}
 			core.Log.Errorf("File data reading error: %v", err)
-			sendResponse("error", "Failed to read file data", session.encoder)
+			sendResponse("error", "Failed to read file data", session)
 			return
 		}
 
 		_, err = multiWriter.Write(buffer[:received])
 		if err != nil {
 			core.Log.Errorf("File writing error: %v", err)
-			sendResponse("error", "Internal server error", session.encoder)
+			sendResponse("error", "Internal server error", session)
 			return
 		}
 

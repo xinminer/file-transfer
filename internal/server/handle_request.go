@@ -78,7 +78,7 @@ func handleRequests(controlConn net.Conn) {
 			}
 			return
 		default:
-			handleUnsupportedRequest(data, session.encoder)
+			handleUnsupportedRequest(data, session)
 			removeUntransferredFile(session)
 			return
 		}
@@ -90,28 +90,28 @@ func handleFileInfoRequest(data map[string]interface{}, session *session) bool {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		core.Log.Errorf("Request conversion error: %v", err)
-		sendResponse("error", "Message \"file_info\" is not valid", session.encoder)
+		sendResponse("error", "Message \"file_info\" is not valid", session)
 		return false
 	}
 
 	var fileInfoRequest core.FileInfoRequest
 	if err := json.Unmarshal(jsonBytes, &fileInfoRequest); err != nil {
 		core.Log.Errorf("Request conversion error: %v", err)
-		sendResponse("error", "Message \"file_info\" is not valid", session.encoder)
+		sendResponse("error", "Message \"file_info\" is not valid", session)
 		return false
 	}
 
 	// Check stage
 	if session.stage != "file_info" {
-		core.Log.Errorf("Stage error: Expected message \"file_info\"")
-		sendResponse("error", "Expected message \"file_info\"", session.encoder)
+		core.Log.Errorf("Stage error: Expected message \"%s\"", session.stage)
+		sendResponse("error", fmt.Sprintf("Expected message \"%s\"", session.stage), session)
 		return false
 	}
 
 	// Validate file info
 	if err := validateFileInfo(fileInfoRequest); err != nil {
 		core.Log.Errorf("Message \"file_info\" validation error: %v", err)
-		sendResponse("error", err.Error(), session.encoder)
+		sendResponse("error", err.Error(), session)
 		return false
 	}
 
@@ -119,7 +119,7 @@ func handleFileInfoRequest(data map[string]interface{}, session *session) bool {
 	if _, err := os.Create(uploadDir + "/" + fileInfoRequest.FileName); err != nil {
 		core.Log.Errorf("File creation error: %v", err)
 		sendResponse("error",
-			fmt.Sprintf("Failed to create file %s", fileInfoRequest.FileName), session.encoder)
+			fmt.Sprintf("Failed to create file %s", fileInfoRequest.FileName), session)
 		return false
 	}
 	core.Log.Debugf("Created file %s/%s", uploadDir, fileInfoRequest.FileName)
@@ -131,7 +131,7 @@ func handleFileInfoRequest(data map[string]interface{}, session *session) bool {
 	session.stage = "start_transfer"
 
 	// Send success response
-	sendResponse("success", "", session.encoder)
+	sendResponse("success", "", session)
 
 	return true
 }
@@ -141,21 +141,21 @@ func handleStartTransferRequest(data map[string]interface{}, session *session) b
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		core.Log.Errorf("Request conversion error: %v", err)
-		sendResponse("error", "Message \"start_transfer\" is not valid", session.encoder)
+		sendResponse("error", "Message \"start_transfer\" is not valid", session)
 		return false
 	}
 
 	var startTransferRequest core.StartTransferRequest
 	if err := json.Unmarshal(jsonBytes, &startTransferRequest); err != nil {
 		core.Log.Errorf("Request conversion error: %v", err)
-		sendResponse("error", "Message \"start_transfer\" is not valid", session.encoder)
+		sendResponse("error", "Message \"start_transfer\" is not valid", session)
 		return false
 	}
 
 	// Check stage
 	if session.stage != "start_transfer" {
-		core.Log.Errorf("Stage error: Expected message \"start_transfer\"")
-		sendResponse("error", "Expected message \"start_transfer\"", session.encoder)
+		core.Log.Errorf("Stage error: Expected message \"%s\"", session.stage)
+		sendResponse("error", fmt.Sprintf("Expected message \"%s\"", session.stage), session)
 		return false
 	}
 
@@ -164,7 +164,7 @@ func handleStartTransferRequest(data map[string]interface{}, session *session) b
 		fmt.Sprintf("%s:%d", session.controlAddr.IP, startTransferRequest.Port))
 	if err != nil {
 		core.Log.Errorf("Transfer address resolving error: %v", err)
-		sendResponse("error", "Internal server error", session.encoder)
+		sendResponse("error", "Internal server error", session)
 		return false
 	}
 	transferFile(transferAddr, session)
@@ -180,38 +180,38 @@ func handleEndTransferRequest(data map[string]interface{}, session *session) boo
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		core.Log.Errorf("Request conversion error: %v", err)
-		sendResponse("error", "Message \"end_transfer\" is not valid", session.encoder)
+		sendResponse("error", "Message \"end_transfer\" is not valid", session)
 		return false
 	}
 
 	var endTransferRequest core.EndTransferRequest
 	if err := json.Unmarshal(jsonBytes, &endTransferRequest); err != nil {
 		core.Log.Errorf("Request conversion error: %v", err)
-		sendResponse("error", "Message \"end_transfer\" is not valid", session.encoder)
+		sendResponse("error", "Message \"end_transfer\" is not valid", session)
 		return false
 	}
 
 	// Check stage
 	if session.stage != "end_transfer" {
-		core.Log.Errorf("Stage error: Expected message \"end_transfer\"", session.encoder)
-		sendResponse("error", "Expected message \"end_transfer\"", session.encoder)
+		core.Log.Errorf("Stage error: Expected message \"%s\"", session.stage)
+		sendResponse("error", fmt.Sprintf("Expected message \"%s\"", session.stage), session)
 		return false
 	}
 
 	// Check transferred file
 	if session.expectedFileSize != session.actualFileSize {
 		core.Log.Errorf("Actual and expected file sizes is are different")
-		sendResponse("error", "Actual and expected file sizes is are different", session.encoder)
+		sendResponse("error", "Actual and expected file sizes is are different", session)
 		return false
 	}
 	if session.fileHashSum != endTransferRequest.FileHashSum {
 		core.Log.Errorf("Actual and expected file hash sums is are different")
-		sendResponse("error", "Actual and expected file hash sums is are different", session.encoder)
+		sendResponse("error", "Actual and expected file hash sums is are different", session)
 		return false
 	}
 
 	// Send success response
-	sendResponse("success", "", session.encoder)
+	sendResponse("success", "", session)
 	core.Log.Infof("File %s transferred successfully", session.filePath)
 
 	// Update session
@@ -220,16 +220,26 @@ func handleEndTransferRequest(data map[string]interface{}, session *session) boo
 	return true
 }
 
-func handleUnsupportedRequest(data map[string]interface{}, encoder *json.Encoder) {
+func handleUnsupportedRequest(data map[string]interface{}, session *session) {
 	core.Log.Errorf("Request receiving error: Message type \"%s\" is unsupported",
 		data["type"].(string))
 	sendResponse("error",
 		fmt.Sprintf("Message type \"%s\" is unsupported", data["type"].(string)),
-		encoder)
+		session)
 }
 
-func sendResponse(status string, message string, encoder *json.Encoder) {
-	if err := encoder.Encode(core.Response{Type: status, Message: message}); err != nil {
+func sendResponse(status string, message string, session *session) {
+	// Convert response object to JSON
+	jsonBytes, err := json.Marshal(core.Response{Type: status, Message: message})
+	if err != nil {
+		core.Log.Errorf("Marshalling error: %v", err)
+		return
+	}
+
+	// Send JSON
+	session.controlConn.SetWriteDeadline(time.Now().Add(clientTimeout))
+	_, err = session.controlConn.Write(jsonBytes)
+	if err != nil {
 		core.Log.Errorf("Response sending error: %v", err)
 		return
 	}
