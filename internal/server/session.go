@@ -6,8 +6,7 @@ import (
 )
 
 type session struct {
-	encoder          *json.Encoder
-	decoder          *json.Decoder
+	controlConn      net.Conn
 	controlAddr      *net.TCPAddr
 	fileIsCreated    bool
 	filePath         string
@@ -17,11 +16,10 @@ type session struct {
 	stage            string
 }
 
-func newSession(conn net.Conn) *session {
+func newSession(controlConn net.Conn) *session {
 	return &session{
-		encoder:          json.NewEncoder(conn),
-		decoder:          json.NewDecoder(conn),
-		controlAddr:      conn.RemoteAddr().(*net.TCPAddr),
+		controlConn:      controlConn,
+		controlAddr:      controlConn.RemoteAddr().(*net.TCPAddr),
 		fileIsCreated:    false,
 		filePath:         "",
 		expectedFileSize: 0,

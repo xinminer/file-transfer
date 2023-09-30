@@ -1,11 +1,13 @@
 package server
 
 import (
+	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
 	"os"
+	"time"
 
 	"file-transfer/internal/core"
 )
@@ -28,12 +30,24 @@ func handleRequests(controlConn net.Conn) {
 	// Create session
 	session := newSession(controlConn)
 
+	reader := bufio.NewReader(session.controlConn)
 	var data map[string]interface{}
 	for {
 		// Receive JSON message
-		if err := session.decoder.Decode(&data); err != nil {
-			core.Log.Errorf("Request receiving error: Expected message with JSON format: %v", err)
-			sendResponse("error", "Expected message with JSON format", session.encoder)
+		session.controlConn.SetReadDeadline(time.Now().Add(clientTimeout))
+		jsonBytes, err := reader.ReadBytes('\n')
+		if err != nil {
+			core.Log.Errorf("Request receiving error: %v", err)
+			sendResponse("error", "Failed to read request", session)
+			removeUntransferredFile(session)
+			time.Sleep(2 * time.Second)
+			return
+		}
+
+		// Convert JSON to object
+		if err := json.Unmarshal(jsonBytes, &data); err != nil {
+			core.Log.Errorf("Unmarshalling error: Expected message with JSON format: %v", err)
+			sendResponse("error", "Expected message with JSON format", session)
 			removeUntransferredFile(session)
 			return
 		}
@@ -41,7 +55,7 @@ func handleRequests(controlConn net.Conn) {
 		// Check type field
 		if _, ok := data["type"]; !ok {
 			core.Log.Errorf("Request conversion error: Field \"type\" is missing")
-			sendResponse("error", "Field \"type\" is missing", session.encoder)
+			sendResponse("error", "Field \"type\" is missing", session)
 			removeUntransferredFile(session)
 			return
 		}

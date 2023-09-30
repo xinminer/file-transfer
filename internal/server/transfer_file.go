@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"os"
+	"time"
 
 	"github.com/robfig/cron/v3"
 
@@ -17,7 +18,7 @@ func transferFile(transferAddr *net.TCPAddr, session *session) {
 	transferConn, err := net.DialTCP("tcp", nil, transferAddr)
 	if err != nil {
 		core.Log.Errorf("Transfer connection creation error: %v", err)
-		sendResponse("error", "Failed to create transfer connection", session.encoder)
+		sendResponse("error", "Failed to create transfer connection", session)
 		return
 	}
 	core.Log.Debugf("Created transfer connection to %v", transferAddr)
@@ -33,7 +34,7 @@ func transferFile(transferAddr *net.TCPAddr, session *session) {
 	file, err := os.OpenFile(session.filePath, os.O_RDWR, 0)
 	if err != nil {
 		core.Log.Errorf("File opening error: %v", err)
-		sendResponse("error", "Internal server error", session.encoder)
+		sendResponse("error", "Internal server error", session)
 		return
 	}
 	core.Log.Debugf("Opened file %s", session.filePath)

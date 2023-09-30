@@ -3,12 +3,14 @@ package server
 import (
 	"net"
 	"os"
+	"time"
 
 	"file-transfer/internal/core"
 )
 
 const (
-	uploadDir = "uploads"
+	uploadDir     = "uploads"
+	clientTimeout = 10 * time.Second
 )
 
 func Start(serverAddr *net.TCPAddr) {
