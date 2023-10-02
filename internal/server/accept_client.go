@@ -35,7 +35,7 @@ func Start(serverAddr *net.TCPAddr) {
 
 	// Accepting control connection
 	for {
-		controlConn, err := listener.Accept()
+		controlConn, err := listener.AcceptTCP()
 		if err != nil {
 			core.Log.Errorf("Control connection accepting error: %v", err)
 		}
