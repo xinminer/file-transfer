@@ -35,7 +35,7 @@ func Parse() (addr string, port int, filePath string) {
 }
 
 func validateAddress(addr string) {
-	_, err := net.LookupHost(addr)
+	_, err := net.ResolveIPAddr("ip", addr)
 	if err != nil {
 		fmt.Println(addr, "is not valid IP address")
 		flag.PrintDefaults()
