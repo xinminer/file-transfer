@@ -10,7 +10,7 @@ import (
 
 const (
 	uploadDir     = "uploads"
-	clientTimeout = 10 * time.Second
+	clientTimeout = time.Minute
 )
 
 func Start(serverAddr *net.TCPAddr) {
