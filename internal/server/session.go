@@ -5,7 +5,7 @@ import (
 )
 
 type session struct {
-	controlConn      net.Conn
+	controlConn      *net.TCPConn
 	controlAddr      *net.TCPAddr
 	fileIsCreated    bool
 	filePath         string
@@ -15,7 +15,7 @@ type session struct {
 	stage            string
 }
 
-func newSession(controlConn net.Conn) *session {
+func newSession(controlConn *net.TCPConn) *session {
 	return &session{
 		controlConn:      controlConn,
 		controlAddr:      controlConn.RemoteAddr().(*net.TCPAddr),

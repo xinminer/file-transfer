@@ -18,7 +18,7 @@ const (
 	bufferSize        = 1024
 )
 
-func handleRequests(controlConn net.Conn) {
+func handleRequests(controlConn *net.TCPConn) {
 	defer func() {
 		if err := controlConn.Close(); err != nil {
 			core.Log.Errorf("Control connection closing error: %v", err)
