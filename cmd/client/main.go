@@ -5,8 +5,8 @@ import (
 	"net"
 
 	"file-transfer/internal/client"
-	cliparser "file-transfer/internal/client/cli-parser"
-	"file-transfer/internal/core"
+	"file-transfer/internal/client/cli"
+	"file-transfer/internal/log"
 )
 
 const title string = "                                                                             \n" +
@@ -21,11 +21,11 @@ const title string = "                                                          
 func main() {
 	fmt.Println(title)
 
-	ip, port, filePath := cliparser.Parse()
+	ip, port, filePath := cli.Parse()
 
 	serverAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%v:%d", ip, port))
 	if err != nil {
-		core.Log.Errorf("Resolving error: %v", serverAddr)
+		log.Log.Errorf("Resolving error: %v", serverAddr)
 		return
 	}
 

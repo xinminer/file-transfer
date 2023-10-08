@@ -1,4 +1,4 @@
-package core
+package dto
 
 type FileInfoRequest struct {
 	Type     string `json:"type"`

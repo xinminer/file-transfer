@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net"
 
-	"file-transfer/internal/core"
+	"file-transfer/internal/log"
 	"file-transfer/internal/server"
-	cliparser "file-transfer/internal/server/cli-parser"
+	"file-transfer/internal/server/cli"
 )
 
 const title string = "                                                                             \n" +
@@ -21,11 +21,11 @@ const title string = "                                                          
 func main() {
 	fmt.Println(title)
 
-	port := cliparser.Parse()
+	port := cli.Parse()
 
 	serverAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("0.0.0.0:%d", port))
 	if err != nil {
-		core.Log.Errorf("Resolving error: %v", serverAddr)
+		log.Log.Errorf("Resolving error: %v", serverAddr)
 		return
 	}
 

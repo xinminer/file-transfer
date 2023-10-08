@@ -3,7 +3,7 @@ package server
 import (
 	"time"
 
-	"file-transfer/internal/core"
+	"file-transfer/internal/log"
 )
 
 type speedComputer struct {
@@ -30,6 +30,6 @@ func (speedCounter *speedComputer) calcSpeed(sessionInfo *session) {
 	speedCounter.previousTime = time.Now()
 	speedCounter.previousActualFileSize = sessionInfo.actualFileSize
 
-	core.Log.Infof("Transfer %s: %s, %s", sessionInfo.filePath, speedToString(instantSpeed),
+	log.Log.Infof("Transfer %s: %s, %s", sessionInfo.filePath, speedToString(instantSpeed),
 		speedToString(averageSpeed))
 }

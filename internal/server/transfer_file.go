@@ -10,40 +10,40 @@ import (
 
 	"github.com/robfig/cron/v3"
 
-	"file-transfer/internal/core"
+	"file-transfer/internal/log"
 )
 
 func transferFile(transferAddr *net.TCPAddr, session *session) {
 	// Create transfer connection
 	transferConn, err := net.DialTCP("tcp", nil, transferAddr)
 	if err != nil {
-		core.Log.Errorf("Transfer connection creation error: %v", err)
+		log.Log.Errorf("Transfer connection creation error: %v", err)
 		sendResponse("error", "Failed to create transfer connection", session)
 		return
 	}
-	core.Log.Debugf("Created transfer connection to %v", transferAddr)
+	log.Log.Debugf("Created transfer connection to %v", transferAddr)
 	defer func() {
 		if err := transferConn.Close(); err != nil {
-			core.Log.Errorf("Transfer connection closing error: %v", err)
+			log.Log.Errorf("Transfer connection closing error: %v", err)
 			return
 		}
-		core.Log.Debugf("Closed transfer connection to %v", transferAddr)
+		log.Log.Debugf("Closed transfer connection to %v", transferAddr)
 	}()
 
 	// Open file
 	file, err := os.OpenFile(session.filePath, os.O_RDWR, 0)
 	if err != nil {
-		core.Log.Errorf("File opening error: %v", err)
+		log.Log.Errorf("File opening error: %v", err)
 		sendResponse("error", "Internal server error", session)
 		return
 	}
-	core.Log.Debugf("Opened file %s", session.filePath)
+	log.Log.Debugf("Opened file %s", session.filePath)
 	defer func() {
 		if err := file.Close(); err != nil {
-			core.Log.Errorf("File closing error: %v", err)
+			log.Log.Errorf("File closing error: %v", err)
 			return
 		}
-		core.Log.Debugf("Closed file %s", session.filePath)
+		log.Log.Debugf("Closed file %s", session.filePath)
 	}()
 
 	// Start speed counter
@@ -59,7 +59,7 @@ func transferFile(transferAddr *net.TCPAddr, session *session) {
 	fileHashSum := sha256.New()
 	multiWriter := io.MultiWriter(file, fileHashSum)
 
-	core.Log.Debugf("Start file transfer")
+	log.Log.Debugf("Start file transfer")
 	for session.actualFileSize < session.expectedFileSize {
 		transferConn.SetReadDeadline(time.Now().Add(clientTimeout))
 		received, err := transferConn.Read(buffer)
@@ -67,14 +67,14 @@ func transferFile(transferAddr *net.TCPAddr, session *session) {
 			if err == io.EOF {
 				break
 			}
-			core.Log.Errorf("File data reading error: %v", err)
+			log.Log.Errorf("File data reading error: %v", err)
 			sendResponse("error", "Failed to read file data", session)
 			return
 		}
 
 		_, err = multiWriter.Write(buffer[:received])
 		if err != nil {
-			core.Log.Errorf("File writing error: %v", err)
+			log.Log.Errorf("File writing error: %v", err)
 			sendResponse("error", "Internal server error", session)
 			return
 		}
@@ -86,7 +86,7 @@ func transferFile(transferAddr *net.TCPAddr, session *session) {
 	scheduler.Stop()
 	speedCounter.calcSpeed(session)
 
-	core.Log.Debugf("Finish file transfer")
+	log.Log.Debugf("Finish file transfer")
 
 	// Update session
 	session.fileHashSum = hex.EncodeToString(fileHashSum.Sum(nil))

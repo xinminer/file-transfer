@@ -12,5 +12,4 @@ func speedToString(speed float64) string {
 	} else {
 		return fmt.Sprintf("%.2f GB/s", speed/(1024*1024*1024))
 	}
-
 }
