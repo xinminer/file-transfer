@@ -3,13 +3,13 @@ FROM golang:1.18
 WORKDIR /file-transfer
 
 COPY go.mod go.sum ./
-RUN go mod download
-
 COPY cmd ./cmd
-RUN rm -rf ./cmd/server
 COPY internal ./internal
-RUN rm -rf ./internal/server
 
+RUN rm -rf ./cmd/server
+RUN rm -rf ./internal/server
 RUN mkdir -p transfer-files
 
-CMD go run ./cmd/client -address $SERVER_ADDRESS -port $SERVER_PORT -file /transfer-files/$FILE_NAME
+RUN go mod download
+RUN go build ./cmd/client
+ENTRYPOINT ./client -address $SERVER_ADDRESS -port $SERVER_PORT -file /file-transfer/transfer-files/$FILE_NAME
