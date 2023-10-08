@@ -4,12 +4,12 @@ services:
         build:
             context: ./
             dockerfile: ./server.Dockerfile
-        image: file-transfer-server-app
+        image: ptrvsrg/file-transfer-server:1.0.0
         container_name: file-transfer-server
         environment:
             SERVER_PORT: ${SERVER_PORT}
         volumes:
-            -   "./uploads:/uploads"
+            - "./uploads:/file-transfer/uploads"
         networks:
             test-network:
                 ipv4_address: 172.21.0.2
@@ -17,16 +17,16 @@ services:
         build:
             context: ./
             dockerfile: ./client.Dockerfile
-        image: file-transfer-client-app
+        image: ptrvsrg/file-transfer-client:1.0.0
         container_name: file-transfer-client
         depends_on:
-            -   server
+            - server
         environment:
             SERVER_ADDRESS: 172.21.0.2
             SERVER_PORT: ${SERVER_PORT}
             FILE_NAME: ${FILE_NAME}
         volumes:
-            - "./transfer-files:/transfer-files"
+            - "./transfer-files:/file-transfer/transfer-files"
         networks:
             test-network:
                 ipv4_address: 172.21.0.3
