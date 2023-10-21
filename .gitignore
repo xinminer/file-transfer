@@ -130,3 +130,5 @@ fabric.properties
 .nfs*
 
 # End of https://www.toptal.com/developers/gitignore/api/go,goland+all,linux
+/client
+/server

@@ -2,21 +2,25 @@ package server
 
 import (
 	"net"
-	"os"
 	"time"
 
 	"file-transfer/internal/log"
 )
 
 const (
-	uploadDir     = "uploads"
 	clientTimeout = time.Minute
 )
 
-func Start(serverAddr *net.TCPAddr) {
-	// Make upload directory
-	if err := os.Mkdir(uploadDir, os.ModePerm); err != nil && os.IsNotExist(err) {
-		log.Log.Errorf("Upload directory creation error: %v", err)
+var store *storage
+
+func Start(serverAddr *net.TCPAddr, destinations []string) {
+
+	// Configuration file storage location
+	store = newStorage()
+	for _, destination := range destinations {
+		if err := store.addPath(destination); err != nil {
+			log.Log.Warnf("Configuration file storage location error: %v", err)
+		}
 	}
 
 	// Create control connection listener
@@ -41,6 +45,8 @@ func Start(serverAddr *net.TCPAddr) {
 		}
 		log.Log.Debugf("Created control connection from %v", controlConn.RemoteAddr())
 
-		go handleRequests(controlConn)
+		go func() {
+			handleRequests(controlConn)
+		}()
 	}
 }

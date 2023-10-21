@@ -9,6 +9,7 @@ type session struct {
 	controlAddr      *net.TCPAddr
 	fileIsCreated    bool
 	filePath         string
+	parentPath       string
 	expectedFileSize int64
 	actualFileSize   int64
 	fileHashSum      string
@@ -21,6 +22,7 @@ func newSession(controlConn *net.TCPConn) *session {
 		controlAddr:      controlConn.RemoteAddr().(*net.TCPAddr),
 		fileIsCreated:    false,
 		filePath:         "",
+		parentPath:       "",
 		expectedFileSize: 0,
 		actualFileSize:   0,
 		fileHashSum:      "",

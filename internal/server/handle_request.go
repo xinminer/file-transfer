@@ -109,25 +109,33 @@ func handleFileInfoRequest(data map[string]interface{}, session *session) bool {
 		return false
 	}
 
+	// Get storage path
+	path, err := store.getPath(fileInfoRequest.FileSize)
+	if err != nil {
+		log.Log.Errorf("get storage path error: %v", err)
+		sendResponse("error", err.Error(), session)
+		return false
+	}
+	session.parentPath = path
+
 	// Validate file info
-	if err := validateFileInfo(fileInfoRequest); err != nil {
+	if err := validateFileInfo(fileInfoRequest, path); err != nil {
 		log.Log.Errorf("Message \"file_info\" validation error: %v", err)
 		sendResponse("error", err.Error(), session)
 		return false
 	}
 
 	// Create file
-	if _, err := os.Create(uploadDir + "/" + fileInfoRequest.FileName); err != nil {
+	if _, err := os.Create(path + "/" + fileInfoRequest.FileName); err != nil {
 		log.Log.Errorf("File creation error: %v", err)
-		sendResponse("error",
-			fmt.Sprintf("Failed to create file %s", fileInfoRequest.FileName), session)
+		sendResponse("error", fmt.Sprintf("Failed to create file %s", fileInfoRequest.FileName), session)
 		return false
 	}
-	log.Log.Debugf("Created file %s/%s", uploadDir, fileInfoRequest.FileName)
+	log.Log.Debugf("Created file %s/%s", path, fileInfoRequest.FileName)
 	session.fileIsCreated = true
 
 	// Update session info
-	session.filePath = uploadDir + "/" + fileInfoRequest.FileName
+	session.filePath = path + "/" + fileInfoRequest.FileName
 	session.expectedFileSize = fileInfoRequest.FileSize
 	session.stage = "start_transfer"
 
@@ -246,7 +254,7 @@ func sendResponse(status string, message string, session *session) {
 	}
 }
 
-func validateFileInfo(fileInfo dto.FileInfoRequest) error {
+func validateFileInfo(fileInfo dto.FileInfoRequest, path string) error {
 	// Check file name
 	if len(fileInfo.FileName) == 0 {
 		return errors.New("File name is empty")
@@ -264,7 +272,7 @@ func validateFileInfo(fileInfo dto.FileInfoRequest) error {
 	}
 
 	// Check if file with same name exists
-	if _, err := os.Stat(uploadDir + "/" + fileInfo.FileName); !os.IsNotExist(err) {
+	if _, err := os.Stat(path + "/" + fileInfo.FileName); !os.IsNotExist(err) {
 		return errors.New(fmt.Sprintf("File %s already exists", fileInfo.FileName))
 	}
 
@@ -277,6 +285,7 @@ func removeUntransferredFile(session *session) {
 			log.Log.Errorf("Untransferred file removing error: %v", err)
 		} else {
 			log.Log.Debugf("File %s removed", session.filePath)
+			store.release(session.parentPath, session.expectedFileSize)
 		}
 	}
 }

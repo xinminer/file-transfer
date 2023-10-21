@@ -7,11 +7,11 @@ import (
 	"os"
 )
 
-func Parse() (addr string, port int, filePath string) {
+func Parse() (addr string, port int, path string) {
 	// Create options
 	flag.StringVar(&addr, "address", "", "Server address")
 	flag.IntVar(&port, "port", 0, "Server port")
-	flag.StringVar(&filePath, "file", "", "Transfer file path")
+	flag.StringVar(&path, "path", "", "Transfer file path")
 
 	// Parse
 	flag.Parse()

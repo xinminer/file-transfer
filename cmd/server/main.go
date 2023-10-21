@@ -21,7 +21,7 @@ const title string = "                                                          
 func main() {
 	fmt.Println(title)
 
-	port := cli.Parse()
+	port, destinations := cli.Parse()
 
 	serverAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("0.0.0.0:%d", port))
 	if err != nil {
@@ -29,5 +29,5 @@ func main() {
 		return
 	}
 
-	server.Start(serverAddr)
+	server.Start(serverAddr, destinations)
 }
