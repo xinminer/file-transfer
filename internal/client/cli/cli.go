@@ -7,11 +7,13 @@ import (
 	"os"
 )
 
-func Parse() (addr string, port int, path string) {
+func Parse() (addr string, port int, path string, suffix string, parallel int) {
 	// Create options
 	flag.StringVar(&addr, "address", "", "Server address")
 	flag.IntVar(&port, "port", 0, "Server port")
 	flag.StringVar(&path, "path", "", "Transfer file path")
+	flag.StringVar(&suffix, "suffix", "", "File extension")
+	flag.IntVar(&parallel, "parallel", 10, "Send file parallel")
 
 	// Parse
 	flag.Parse()
@@ -21,7 +23,7 @@ func Parse() (addr string, port int, path string) {
 	flag.Visit(func(flag *flag.Flag) {
 		seen[flag.Name] = true
 	})
-	if !seen["address"] || !seen["port"] || !seen["file"] {
+	if !seen["address"] || !seen["port"] {
 		fmt.Println("Missing required flags: -address, -port, -file")
 		flag.PrintDefaults()
 		os.Exit(1)

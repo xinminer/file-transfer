@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/gogf/gf/v2/os/gfile"
+	"github.com/gogf/gf/v2/text/gstr"
 	"net"
 	"os"
 	"time"
@@ -225,6 +227,13 @@ func handleEndTransferRequest(data map[string]interface{}, session *session) boo
 
 	// Update session
 	session.stage = ""
+
+	if gstr.HasSuffix(session.filePath, "fmv") {
+		finalFilePath := gstr.Replace(session.filePath, ".fmv", "")
+		if err := gfile.Move(session.filePath, finalFilePath); err != nil {
+			log.Log.Warnf("Moving file to final path error: %v", err)
+		}
+	}
 
 	return true
 }

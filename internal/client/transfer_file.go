@@ -10,7 +10,7 @@ import (
 	"file-transfer/internal/log"
 )
 
-func createTransferConnectionListener(listenIp net.IP) (*net.TCPListener, bool) {
+func createTransferConnectionListener(listenIp net.IP, listenPort int) (*net.TCPListener, bool) {
 	listenAddr := &net.TCPAddr{
 		IP:   listenIp,
 		Port: listenPort,

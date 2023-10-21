@@ -2,6 +2,7 @@ package client
 
 import (
 	"encoding/json"
+	"github.com/gogf/gf/v2/os/gfile"
 	"net"
 	"os"
 
@@ -10,11 +11,11 @@ import (
 )
 
 const (
-	listenPort = 4444
+	//listenPort = 4444
 	bufferSize = 1024
 )
 
-func Start(serverAddr *net.TCPAddr, filePath string) {
+func Start(serverAddr *net.TCPAddr, filePath string, localListenPort int) {
 	// Get file info
 	fileInfo, err := os.Stat(filePath)
 	if err != nil {
@@ -55,14 +56,14 @@ func Start(serverAddr *net.TCPAddr, filePath string) {
 	}
 
 	// Create transfer connection
-	transferConnListener, done := createTransferConnectionListener(controlConn.LocalAddr().(*net.TCPAddr).IP)
+	transferConnListener, done := createTransferConnectionListener(controlConn.LocalAddr().(*net.TCPAddr).IP, localListenPort)
 	if !done {
 		return
 	}
 
 	startTransferRequest := dto.StartTransferRequest{
 		Type: "start_transfer",
-		Port: listenPort,
+		Port: localListenPort,
 	}
 	if !sendRequest(startTransferRequest, encoder) {
 		return
@@ -101,6 +102,9 @@ func Start(serverAddr *net.TCPAddr, filePath string) {
 		return
 	}
 	log.Log.Infof("File %s transferred successfully", fileInfo.Name())
+	if err := gfile.Remove(filePath); err != nil {
+		log.Log.Errorf("File %s remove error: %v", filePath, err)
+	}
 }
 
 func sendRequest(request any, encoder *json.Encoder) bool {

@@ -1,12 +1,15 @@
 package main
 
 import (
-	"fmt"
-	"net"
-
 	"file-transfer/internal/client"
+	"fmt"
+	"github.com/gogf/gf/v2/util/grand"
+	"net"
+	"time"
+
 	"file-transfer/internal/client/cli"
 	"file-transfer/internal/log"
+	"github.com/gogf/gf/v2/os/gfile"
 )
 
 const title string = "                                                                             \n" +
@@ -21,7 +24,7 @@ const title string = "                                                          
 func main() {
 	fmt.Println(title)
 
-	ip, port, path := cli.Parse()
+	ip, port, path, suffix, parallel := cli.Parse()
 
 	serverAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%v:%d", ip, port))
 	if err != nil {
@@ -29,5 +32,36 @@ func main() {
 		return
 	}
 
-	client.Start(serverAddr, path)
+	ch := make(chan struct{}, parallel)
+	for {
+		ch <- struct{}{}
+		list, err := gfile.ScanDirFile(path, suffix, false)
+		if err != nil {
+			log.Log.Errorf("Scanning file error: %v", err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+
+		if len(list) == 0 {
+			log.Log.Infof("No matching files (%s) found in %s", suffix, path)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+
+		fileName := list[0]
+		tmpFileName := fmt.Sprintf("%s.%s", fileName, "fmv")
+
+		if err := gfile.Move(fileName, tmpFileName); err != nil {
+			log.Log.Errorf("Moving file error: %v", err)
+			continue
+		}
+
+		go func() {
+			localPort := grand.N(5000, 10000)
+			client.Start(serverAddr, tmpFileName, localPort)
+			<-ch
+		}()
+
+	}
+
 }
