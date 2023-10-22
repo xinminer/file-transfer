@@ -49,7 +49,7 @@ func main() {
 
 		if len(list) == 0 {
 			log.Log.Infof("No matching files (%s) found in %s", suffix, path)
-			time.Sleep(5 * time.Second)
+			time.Sleep(25 * time.Second)
 			continue
 		}
 
