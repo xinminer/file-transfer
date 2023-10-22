@@ -24,8 +24,8 @@ func Parse() (localIp string, consulIp string, consulPort int, path string, suff
 	flag.Visit(func(flag *flag.Flag) {
 		seen[flag.Name] = true
 	})
-	if !seen["address"] || !seen["port"] {
-		fmt.Println("Missing required flags: -address, -port, -file")
+	if !seen["consul-ip"] || !seen["consul-port"] {
+		fmt.Println("Missing required flags: -consul-ip, -consul-port")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
