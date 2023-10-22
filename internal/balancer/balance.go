@@ -29,11 +29,11 @@ func Random(consulAddr, service, tags string) (string, error) {
 	lens := len(target)
 	index := rand.Intn(lens)
 	for i := 0; i < 3; i++ {
-		index = rand.Intn(lens)
 		svr := target[index]
 		if svr.Service.Tags[0] == tags {
 			return fmt.Sprintf("%s:%d", target[index].Service.Address, target[index].Service.Port), nil
 		}
+		index = rand.Intn(lens)
 	}
 	return fmt.Sprintf("%s:%d", target[index].Service.Address, target[index].Service.Port), nil
 }
