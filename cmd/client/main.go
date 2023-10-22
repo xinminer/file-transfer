@@ -43,25 +43,25 @@ func main() {
 		list, err = gfile.ScanDirFile(path, suffix, false)
 		if err != nil {
 			log.Log.Errorf("Scanning file error: %v", err)
-			time.Sleep(5 * time.Second)
+			time.Sleep(time.Duration(5) * time.Second)
 			continue
 		}
 
 		if len(list) == 0 {
 			log.Log.Infof("No matching files (%s) found in %s", suffix, path)
-			time.Sleep(25 * time.Second)
+			time.Sleep(time.Duration(5) * time.Second)
 			continue
 		}
 
 		fileName := list[0]
 		tmpFileName := fmt.Sprintf("%s.%s", fileName, "fmv")
 
-		if err := gfile.Move(fileName, tmpFileName); err != nil {
+		if err = gfile.Move(fileName, tmpFileName); err != nil {
 			log.Log.Errorf("Moving file error: %v", err)
 			continue
 		}
 
-		time.Sleep(time.Duration(30) * time.Second)
+		time.Sleep(time.Duration(25) * time.Second)
 
 		service, err := balancer.RoundRobin(fmt.Sprintf("%s:%d", consulIp, consulPort), &svrIndex, "file-server", tag)
 		if err != nil {
