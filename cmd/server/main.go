@@ -21,13 +21,13 @@ const title string = "                                                          
 func main() {
 	fmt.Println(title)
 
-	port, destinations := cli.Parse()
+	svrIp, svrPort, consulIp, consulPort, destinations := cli.Parse()
 
-	serverAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("0.0.0.0:%d", port))
+	serverAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", svrIp, svrPort))
 	if err != nil {
 		log.Log.Errorf("Resolving error: %v", serverAddr)
 		return
 	}
 
-	server.Start(serverAddr, destinations)
+	server.Start(serverAddr, consulIp, consulPort, destinations)
 }

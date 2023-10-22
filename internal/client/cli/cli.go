@@ -7,10 +7,11 @@ import (
 	"os"
 )
 
-func Parse() (addr string, port int, path string, suffix string, parallel int) {
+func Parse() (localIp string, consulIp string, consulPort int, path string, suffix string, parallel int) {
 	// Create options
-	flag.StringVar(&addr, "address", "", "Server address")
-	flag.IntVar(&port, "port", 0, "Server port")
+	flag.StringVar(&localIp, "local-ip", "", "Server address")
+	flag.StringVar(&consulIp, "consul-ip", "", "Consul ip")
+	flag.IntVar(&consulPort, "consul-port", 0, "Consul port")
 	flag.StringVar(&path, "path", "", "Transfer file path")
 	flag.StringVar(&suffix, "suffix", "", "File extension")
 	flag.IntVar(&parallel, "parallel", 10, "Send file parallel")
@@ -30,8 +31,8 @@ func Parse() (addr string, port int, path string, suffix string, parallel int) {
 	}
 
 	// Validate options data
-	validateAddress(addr)
-	validatePort(port)
+	validateAddress(consulIp)
+	validatePort(consulPort)
 
 	return
 }

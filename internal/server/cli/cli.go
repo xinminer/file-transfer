@@ -6,9 +6,12 @@ import (
 	"os"
 )
 
-func Parse() (port int, destinations []string) {
+func Parse() (svrIp string, svrPort int, consulIp string, consulPort int, destinations []string) {
 	// Create options
-	flag.IntVar(&port, "port", 0, "Server port")
+	flag.StringVar(&svrIp, "server-ip", "", "Server ip")
+	flag.IntVar(&svrPort, "server-port", 0, "Server port")
+	flag.StringVar(&consulIp, "consul-ip", "", "Consul ip")
+	flag.IntVar(&consulPort, "consul-port", 0, "Consul port")
 
 	// Parse
 	flag.Parse()
@@ -18,8 +21,8 @@ func Parse() (port int, destinations []string) {
 	flag.Visit(func(flag *flag.Flag) {
 		seen[flag.Name] = true
 	})
-	if !seen["port"] {
-		fmt.Println("Missing required flags: -port")
+	if !seen["svrPort"] {
+		fmt.Println("Missing required flags: -svrPort")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
@@ -27,7 +30,7 @@ func Parse() (port int, destinations []string) {
 	destinations = flag.Args()
 
 	// Validate options data
-	validatePort(port)
+	validatePort(svrPort)
 	validateDestinations(destinations)
 
 	return

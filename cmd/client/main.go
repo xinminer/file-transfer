@@ -2,6 +2,7 @@ package main
 
 import (
 	"file-transfer/internal/client"
+	"file-transfer/internal/consul"
 	"fmt"
 	"github.com/gogf/gf/v2/util/grand"
 	"net"
@@ -24,13 +25,7 @@ const title string = "                                                          
 func main() {
 	fmt.Println(title)
 
-	ip, port, path, suffix, parallel := cli.Parse()
-
-	serverAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%v:%d", ip, port))
-	if err != nil {
-		log.Log.Errorf("Resolving error: %v", serverAddr)
-		return
-	}
+	localIp, consulIp, consulPort, path, suffix, parallel := cli.Parse()
 
 	ch := make(chan struct{}, parallel)
 	for {
@@ -57,7 +52,19 @@ func main() {
 		}
 
 		go func() {
+			service, err := consul.Discovery("file-server", fmt.Sprintf("%s:%d", consulIp, consulPort), localIp, parallel)
+			if err != nil {
+				log.Log.Errorf("Discovery service error: %v", err)
+				return
+			}
 			localPort := grand.N(5000, 10000)
+
+			serverAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%v:%d", service.Service.Address, service.Service.Port))
+			if err != nil {
+				log.Log.Errorf("Resolving error: %v", serverAddr)
+				return
+			}
+
 			client.Start(serverAddr, tmpFileName, localPort)
 			<-ch
 		}()

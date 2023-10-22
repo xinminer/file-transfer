@@ -1,6 +1,9 @@
 package server
 
 import (
+	"file-transfer/internal/consul"
+	"fmt"
+	"github.com/gogf/gf/v2/util/guid"
 	"net"
 	"time"
 
@@ -13,7 +16,7 @@ const (
 
 var store *storage
 
-func Start(serverAddr *net.TCPAddr, destinations []string) {
+func Start(serverAddr *net.TCPAddr, consulIp string, consulPort int, destinations []string) {
 
 	// Configuration file storage location
 	store = newStorage()
@@ -36,6 +39,20 @@ func Start(serverAddr *net.TCPAddr, destinations []string) {
 		}
 		log.Log.Debugf("Closed control connection listener")
 	}()
+
+	// Service discovery
+	dis := consul.DiscoveryConfig{
+		ID:      guid.S(),
+		Name:    "file-server",
+		Tags:    []string{},
+		Port:    serverAddr.Port,
+		Address: serverAddr.IP.String(),
+	}
+
+	if err := consul.RegisterService(fmt.Sprintf("%s:%d", consulIp, consulPort), dis); err != nil {
+		log.Log.Errorf("Connect consul error: %v", err)
+		return
+	}
 
 	// Accepting control connection
 	for {
