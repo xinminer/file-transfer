@@ -40,11 +40,11 @@ func handleRequests(controlConn *net.TCPConn) {
 		session.controlConn.SetReadDeadline(time.Now().Add(clientTimeout))
 		jsonBytes, err := reader.ReadBytes('\n')
 		if err != nil {
-			log.Log.Errorf("Request receiving error: %v", err)
 			if err.Error() == "EOF" {
-				log.Log.Infof("Consul check")
+				log.Log.Debugf("Consul check")
 				return
 			}
+			log.Log.Errorf("Request receiving error: %v", err)
 			sendResponse("error", "Failed to read request", session)
 			removeUntransferredFile(session)
 			time.Sleep(2 * time.Second)
