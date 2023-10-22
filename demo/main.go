@@ -1,13 +1,16 @@
 package main
 
 import (
+	"file-transfer/internal/consul"
+	"file-transfer/internal/log"
 	"fmt"
-	"github.com/gogf/gf/v2/text/gstr"
 )
 
 func main() {
-	comp := gstr.Explode(".", "10.0.13.15")
-	comp = comp[:3]
-	prefix := gstr.Implode(".", comp)
-	fmt.Println(prefix)
+	service, err := consul.Discovery("file-server", fmt.Sprintf("%s:%d", "10.0.8.10", 8500), "n14", 10)
+	if err != nil {
+		log.Log.Errorf("Discovery service error: %v", err)
+		return
+	}
+	fmt.Println(service.Service.Address)
 }
