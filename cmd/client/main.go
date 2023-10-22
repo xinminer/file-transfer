@@ -4,6 +4,7 @@ import (
 	"file-transfer/internal/balancer"
 	"file-transfer/internal/client"
 	"fmt"
+	"github.com/gogf/gf/v2/text/gstr"
 	"net"
 	"time"
 
@@ -26,9 +27,19 @@ func main() {
 
 	consulIp, consulPort, path, suffix, tag := cli.Parse()
 
+	list, err := gfile.ScanDirFile(path, "*.fmv", false)
+	if err != nil {
+		log.Log.Errorf("Scanning file error: %v", err)
+		return
+	}
+
+	for _, f := range list {
+		gstr.Replace(f, ".fmv", "")
+	}
+
 	var svrIndex int
 	for {
-		list, err := gfile.ScanDirFile(path, suffix, false)
+		list, err = gfile.ScanDirFile(path, suffix, false)
 		if err != nil {
 			log.Log.Errorf("Scanning file error: %v", err)
 			time.Sleep(5 * time.Second)
