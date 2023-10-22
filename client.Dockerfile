@@ -6,6 +6,8 @@ COPY go.mod go.sum ./
 COPY cmd ./cmd
 COPY internal ./internal
 
+ENV GOPROXY https://goproxy.cn,direct
+
 RUN rm -rf ./cmd/server
 RUN rm -rf ./internal/server
 RUN mkdir -p transfer-files
