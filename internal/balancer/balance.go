@@ -8,6 +8,9 @@ import (
 )
 
 func RoundRobin(consulAddr string, index *int, service, tags string) (string, error) {
+	defer func() {
+		*index = *index + 1
+	}()
 	target, err := getConsulServices(consulAddr, service, tags)
 	if err != nil {
 		return "", err
