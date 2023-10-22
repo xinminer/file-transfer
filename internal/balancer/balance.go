@@ -1,6 +1,7 @@
 package balancer
 
 import (
+	"file-transfer/internal/log"
 	"fmt"
 	consulapi "github.com/hashicorp/consul/api"
 	"math/rand"
@@ -36,5 +37,6 @@ func getConsulServices(consulAddr, service, tags string) ([]*consulapi.ServiceEn
 		return nil, err
 	}
 	services, _, err := client.Health().Service(service, "", false, nil)
+	log.Log.Infof("services: %d", len(services))
 	return services, err
 }
