@@ -10,7 +10,7 @@ func RoundRobin(consulAddr string, index *int, service, tags string) (string, er
 	defer func() {
 		*index = *index + 1
 	}()
-	target, err := getConsulServices(consulAddr, service, tags)
+	target, err := getConsulServices(consulAddr, service)
 	if err != nil {
 		return "", err
 	}
@@ -22,16 +22,23 @@ func RoundRobin(consulAddr string, index *int, service, tags string) (string, er
 }
 
 func Random(consulAddr, service, tags string) (string, error) {
-	target, err := getConsulServices(consulAddr, service, tags)
+	target, err := getConsulServices(consulAddr, service)
 	if err != nil {
 		return "", err
 	}
 	lens := len(target)
 	index := rand.Intn(lens)
+	for i := 0; i < 3; i++ {
+		index = rand.Intn(lens)
+		svr := target[index]
+		if svr.Service.Tags[0] == tags {
+			return fmt.Sprintf("%s:%d", target[index].Service.Address, target[index].Service.Port), nil
+		}
+	}
 	return fmt.Sprintf("%s:%d", target[index].Service.Address, target[index].Service.Port), nil
 }
 
-func getConsulServices(consulAddr, service, tags string) ([]*consulapi.ServiceEntry, error) {
+func getConsulServices(consulAddr, service string) ([]*consulapi.ServiceEntry, error) {
 	config := consulapi.DefaultConfig()
 	config.Address = consulAddr
 	client, err := consulapi.NewClient(config)
