@@ -4,7 +4,6 @@ import (
 	"file-transfer/internal/balancer"
 	"file-transfer/internal/client"
 	"fmt"
-	"github.com/gogf/gf/v2/util/grand"
 	"net"
 	"time"
 
@@ -58,15 +57,13 @@ func main() {
 				return
 			}
 
-			localPort := grand.N(5000, 10000)
-
 			serverAddr, err := net.ResolveTCPAddr("tcp", service)
 			if err != nil {
 				log.Log.Errorf("Resolving error: %v", serverAddr)
 				return
 			}
 
-			client.Start(serverAddr, tmpFileName, localPort)
+			client.Start(serverAddr, tmpFileName)
 		}()
 
 	}

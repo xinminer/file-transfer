@@ -11,11 +11,11 @@ import (
 )
 
 const (
-	//listenPort = 4444
+	listenPort = 4444
 	bufferSize = 1024
 )
 
-func Start(serverAddr *net.TCPAddr, filePath string, localListenPort int) {
+func Start(serverAddr *net.TCPAddr, filePath string) {
 	// Get file info
 	fileInfo, err := os.Stat(filePath)
 	if err != nil {
@@ -56,14 +56,14 @@ func Start(serverAddr *net.TCPAddr, filePath string, localListenPort int) {
 	}
 
 	// Create transfer connection
-	transferConnListener, done := createTransferConnectionListener(controlConn.LocalAddr().(*net.TCPAddr).IP, localListenPort)
+	transferConnListener, done := createTransferConnectionListener(controlConn.LocalAddr().(*net.TCPAddr).IP)
 	if !done {
 		return
 	}
 
 	startTransferRequest := dto.StartTransferRequest{
 		Type: "start_transfer",
-		Port: localListenPort,
+		Port: listenPort,
 	}
 	if !sendRequest(startTransferRequest, encoder) {
 		return
