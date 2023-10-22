@@ -8,10 +8,12 @@ import (
 
 func main() {
 	var index int
-	s, err := balancer.RoundRobin(fmt.Sprintf("%s:%d", "10.0.8.10", 8500), &index, "file-server", "")
-	if err != nil {
-		log.Log.Errorf("Discovery service error: %v", err)
-		return
+	for i := 0; i < 100; i++ {
+		s, err := balancer.RoundRobin(fmt.Sprintf("%s:%d", "10.0.8.10", 8500), &index, "file-server", "")
+		if err != nil {
+			log.Log.Errorf("Discovery service error: %v", err)
+			return
+		}
+		fmt.Println(s)
 	}
-	fmt.Println(s)
 }
