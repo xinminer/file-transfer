@@ -21,8 +21,8 @@ func Parse() (svrIp string, svrPort int, consulIp string, consulPort int, destin
 	flag.Visit(func(flag *flag.Flag) {
 		seen[flag.Name] = true
 	})
-	if !seen["svrPort"] {
-		fmt.Println("Missing required flags: -svrPort")
+	if !seen["server-port"] {
+		fmt.Println("Missing required flags: -server-port")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
