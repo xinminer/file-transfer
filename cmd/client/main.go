@@ -25,12 +25,10 @@ const title string = "                                                          
 func main() {
 	fmt.Println(title)
 
-	consulIp, consulPort, path, suffix, parallel, tag := cli.Parse()
+	consulIp, consulPort, path, suffix, tag := cli.Parse()
 
 	var svrIndex int
-	ch := make(chan struct{}, parallel)
 	for {
-		ch <- struct{}{}
 		list, err := gfile.ScanDirFile(path, suffix, false)
 		if err != nil {
 			log.Log.Errorf("Scanning file error: %v", err)
@@ -69,7 +67,6 @@ func main() {
 			}
 
 			client.Start(serverAddr, tmpFileName, localPort)
-			<-ch
 		}()
 
 	}
