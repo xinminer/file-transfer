@@ -1,8 +1,8 @@
 package main
 
 import (
+	"file-transfer/internal/balancer"
 	"file-transfer/internal/client"
-	"file-transfer/internal/consul"
 	"fmt"
 	"github.com/gogf/gf/v2/util/grand"
 	"net"
@@ -27,6 +27,7 @@ func main() {
 
 	consulIp, consulPort, path, suffix, parallel, tag := cli.Parse()
 
+	var svrIndex int
 	ch := make(chan struct{}, parallel)
 	for {
 		ch <- struct{}{}
@@ -52,14 +53,16 @@ func main() {
 		}
 
 		go func() {
-			service, err := consul.Discovery("file-server", fmt.Sprintf("%s:%d", consulIp, consulPort), tag, parallel)
+
+			service, err := balancer.RoundRobin(fmt.Sprintf("%s:%d", consulIp, consulPort), &svrIndex, "file-server", tag)
 			if err != nil {
 				log.Log.Errorf("Discovery service error: %v", err)
 				return
 			}
+
 			localPort := grand.N(5000, 10000)
 
-			serverAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%v:%d", service.Service.Address, service.Service.Port))
+			serverAddr, err := net.ResolveTCPAddr("tcp", service)
 			if err != nil {
 				log.Log.Errorf("Resolving error: %v", serverAddr)
 				return
