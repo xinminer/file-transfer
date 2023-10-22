@@ -25,7 +25,7 @@ const title string = "                                                          
 func main() {
 	fmt.Println(title)
 
-	localIp, consulIp, consulPort, path, suffix, parallel := cli.Parse()
+	consulIp, consulPort, path, suffix, parallel, tag := cli.Parse()
 
 	ch := make(chan struct{}, parallel)
 	for {
@@ -52,7 +52,7 @@ func main() {
 		}
 
 		go func() {
-			service, err := consul.Discovery("file-server", fmt.Sprintf("%s:%d", consulIp, consulPort), localIp, parallel)
+			service, err := consul.Discovery("file-server", fmt.Sprintf("%s:%d", consulIp, consulPort), tag, parallel)
 			if err != nil {
 				log.Log.Errorf("Discovery service error: %v", err)
 				return

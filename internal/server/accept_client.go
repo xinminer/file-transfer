@@ -16,7 +16,7 @@ const (
 
 var store *storage
 
-func Start(serverAddr *net.TCPAddr, consulIp string, consulPort int, destinations []string) {
+func Start(serverAddr *net.TCPAddr, consulIp string, consulPort int, tag string, destinations []string) {
 
 	// Configuration file storage location
 	store = newStorage()
@@ -44,7 +44,7 @@ func Start(serverAddr *net.TCPAddr, consulIp string, consulPort int, destination
 	dis := consul.DiscoveryConfig{
 		ID:      guid.S(),
 		Name:    "file-server",
-		Tags:    []string{},
+		Tags:    []string{tag},
 		Port:    serverAddr.Port,
 		Address: serverAddr.IP.String(),
 	}

@@ -6,12 +6,13 @@ import (
 	"os"
 )
 
-func Parse() (svrIp string, svrPort int, consulIp string, consulPort int, destinations []string) {
+func Parse() (svrIp string, svrPort int, consulIp string, consulPort int, tag string, destinations []string) {
 	// Create options
 	flag.StringVar(&svrIp, "server-ip", "", "Server ip")
 	flag.IntVar(&svrPort, "server-port", 0, "Server port")
 	flag.StringVar(&consulIp, "consul-ip", "", "Consul ip")
 	flag.IntVar(&consulPort, "consul-port", 0, "Consul port")
+	flag.StringVar(&tag, "tag", "", "Tag")
 
 	// Parse
 	flag.Parse()

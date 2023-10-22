@@ -7,14 +7,14 @@ import (
 	"os"
 )
 
-func Parse() (localIp string, consulIp string, consulPort int, path string, suffix string, parallel int) {
+func Parse() (consulIp string, consulPort int, path string, suffix string, parallel int, tag string) {
 	// Create options
-	flag.StringVar(&localIp, "local-ip", "", "Server address")
 	flag.StringVar(&consulIp, "consul-ip", "", "Consul ip")
 	flag.IntVar(&consulPort, "consul-port", 0, "Consul port")
 	flag.StringVar(&path, "path", "", "Transfer file path")
 	flag.StringVar(&suffix, "suffix", "", "File extension")
 	flag.IntVar(&parallel, "parallel", 10, "Send file parallel")
+	flag.StringVar(&tag, "tag", "", "File extension")
 
 	// Parse
 	flag.Parse()

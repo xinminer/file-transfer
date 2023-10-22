@@ -5,7 +5,6 @@ import (
 	"file-transfer/internal/log"
 	"fmt"
 	"github.com/gogf/gf/v2/container/glist"
-	"github.com/gogf/gf/v2/text/gstr"
 	consulapi "github.com/hashicorp/consul/api"
 	"math/rand"
 )
@@ -50,7 +49,7 @@ func RegisterService(addr string, dis DiscoveryConfig) error {
 	return nil
 }
 
-func Discovery(serviceName string, consulAddr string, localIp string, parallel int) (*consulapi.ServiceEntry, error) {
+func Discovery(serviceName string, consulAddr string, tag string, parallel int) (*consulapi.ServiceEntry, error) {
 
 	if cache.Size() > 0 {
 		value, ok := cache.PopFront().(*consulapi.ServiceEntry)
@@ -78,16 +77,17 @@ func Discovery(serviceName string, consulAddr string, localIp string, parallel i
 	var candidate []*consulapi.ServiceEntry
 
 	for _, service := range services {
-		serviceAddress := service.Service.Address
-		comp := gstr.Explode(".", localIp)
-		comp = comp[:3]
-		prefix := gstr.Implode(".", comp)
-		if gstr.HasPrefix(serviceAddress, prefix) {
+		isPreferred := false
+		for _, t := range service.Service.Tags {
+			if tag == t {
+				isPreferred = true
+			}
+		}
+		if isPreferred {
 			preferred = append(preferred, service)
 		} else {
 			candidate = append(candidate, service)
 		}
-
 	}
 
 	rand.Shuffle(len(preferred), func(i, j int) { preferred[i], preferred[j] = preferred[j], preferred[i] })
