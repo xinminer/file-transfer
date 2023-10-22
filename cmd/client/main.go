@@ -27,12 +27,13 @@ func main() {
 
 	consulIp, consulPort, path, suffix, tag := cli.Parse()
 
-	list, err := gfile.ScanDirFile(path, suffix+".fmv", false)
+	list, err := gfile.ScanDirFile(path, ".fmv", false)
 	if err != nil {
 		log.Log.Errorf("Scanning file error: %v", err)
 		return
 	}
 
+	log.Log.Infof("Clear history *.fmv count: %d", len(list))
 	for _, f := range list {
 		gstr.Replace(f, ".fmv", "")
 	}
@@ -59,7 +60,7 @@ func main() {
 			continue
 		}
 
-		time.Sleep(time.Duration(25) * time.Second)
+		time.Sleep(time.Duration(15) * time.Second)
 
 		service, err := balancer.Random(fmt.Sprintf("%s:%d", consulIp, consulPort), "file-server", tag)
 		if err != nil {
