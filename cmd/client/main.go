@@ -35,7 +35,10 @@ func main() {
 
 	log.Log.Infof("Clear history *.fmv count: %d", len(list))
 	for _, f := range list {
-		gstr.Replace(f, ".fmv", "")
+		originalName := gstr.Replace(f, ".fmv", "")
+		if err = gfile.Move(f, originalName); err != nil {
+			log.Log.Warnf("Clear history *.fmv error: %v", err)
+		}
 	}
 
 	for {
