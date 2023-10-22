@@ -37,8 +37,8 @@ func RegisterService(addr string, dis DiscoveryConfig) error {
 
 	check := &consulapi.AgentServiceCheck{}
 	check.TCP = fmt.Sprintf("%s:%d", registration.Address, registration.Port)
-	check.Timeout = "5s"
-	check.Interval = "5s"
+	check.Timeout = "60s"
+	check.Interval = "60s"
 	check.DeregisterCriticalServiceAfter = "60s"
 	registration.Check = check
 
