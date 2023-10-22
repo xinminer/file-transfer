@@ -13,8 +13,6 @@ import (
 	"github.com/gogf/gf/v2/os/gfile"
 )
 
-var svrIndex int
-
 const title string = "                                                                             \n" +
 	"    ____________    ______   __________  ___    _   _______ ________________ \n" +
 	"   / ____/  _/ /   / ____/  /_  __/ __ \\/   |  / | / / ___// ____/ ____/ __ \\\n" +
@@ -63,7 +61,7 @@ func main() {
 
 		time.Sleep(time.Duration(25) * time.Second)
 
-		service, err := balancer.RoundRobin(fmt.Sprintf("%s:%d", consulIp, consulPort), &svrIndex, "file-server", tag)
+		service, err := balancer.Random(fmt.Sprintf("%s:%d", consulIp, consulPort), "file-server", tag)
 		if err != nil {
 			log.Log.Errorf("Discovery service error: %v", err)
 			return
