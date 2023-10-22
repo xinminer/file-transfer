@@ -14,5 +14,5 @@ RUN rm -rf ./internal/server
 RUN mkdir -p transfer-files
 
 RUN go mod download
-RUN go build ./demo/main
+RUN go build ./demo/main.go
 ENTRYPOINT ./main
