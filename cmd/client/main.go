@@ -27,7 +27,7 @@ func main() {
 
 	consulIp, consulPort, path, suffix, tag := cli.Parse()
 
-	list, err := gfile.ScanDirFile(path, ".fpt.fmv", false)
+	list, err := gfile.ScanDirFile(path, suffix+".fmv", false)
 	if err != nil {
 		log.Log.Errorf("Scanning file error: %v", err)
 		return
