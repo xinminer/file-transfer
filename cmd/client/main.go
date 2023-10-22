@@ -63,7 +63,7 @@ func main() {
 			continue
 		}
 
-		time.Sleep(time.Duration(15) * time.Second)
+		time.Sleep(time.Duration(12) * time.Second)
 
 		service, err := balancer.Random(fmt.Sprintf("%s:%d", consulIp, consulPort), "file-server", tag)
 		if err != nil {
