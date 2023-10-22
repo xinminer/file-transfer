@@ -1,19 +1,14 @@
 package main
 
 import (
-	"file-transfer/internal/balancer"
 	"file-transfer/internal/log"
-	"fmt"
+	"github.com/shirou/gopsutil/v3/disk"
 )
 
 func main() {
-	var index int
-	for i := 0; i < 100; i++ {
-		s, err := balancer.RoundRobin(fmt.Sprintf("%s:%d", "10.0.8.10", 8500), &index, "file-server", "")
-		if err != nil {
-			log.Log.Errorf("Discovery service error: %v", err)
-			return
-		}
-		fmt.Println(s)
+	stat, err := disk.Usage("/mnt/data1")
+	if err != nil {
+		log.Log.Infof("stat error: %v", err)
 	}
+	log.Log.Infof("stat info: %v", stat)
 }
